@@ -3,6 +3,16 @@ package scene;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import model.Document;
+import model.Product;
+import model.Total;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Controller {
 
@@ -34,28 +44,28 @@ public class Controller {
     /*  Поля таблицы  */
 
     @FXML
-    private TableView <Document> mainTable;
+    private TableView <Product> mainTable;
 
     @FXML
-    private TableColumn <Document, Integer> number;
+    private TableColumn <Product, Integer> number;
 
     @FXML
-    private TableColumn <Document, Integer> productCode;
+    private TableColumn <Product, Integer> productCode;
 
     @FXML
-    private TableColumn <Document, Integer> name;
+    private TableColumn <Product, Integer> name;
 
     @FXML
-    private TableColumn <Document, Integer> measures;
+    private TableColumn <Product, Integer> measures;
 
     @FXML
-    private TableColumn <Document, Integer> measuresCode;
+    private TableColumn <Product, Integer> measuresCode;
 
     @FXML
-    private TableColumn <Document, Integer> cost;
+    private TableColumn <Product, Integer> cost;
 
     @FXML
-    private TableView <Document> costTable;
+    private TableView <Total> costTable;
 
     /*  Подвал документа  */
 
@@ -73,4 +83,39 @@ public class Controller {
 
     @FXML
     private Button saveButton;
+
+    @FXML
+    public void initialize() {
+/*        for (Product product : document.getProducts()) {
+            mainTable.getItems().add(product);
+            Total total = document.getTotal();
+            costTable.getItems().add(total);
+        }*/
+
+        title.setText(title.getText() + " №" + document.getNumber() + " от " + getCurrentDate());
+
+    }
+
+    public void addLine() {
+        if (Product.counter == 1) {
+            Product product = new Product(Product.counter++);
+            this.document.add(product);
+            this.mainTable.getItems().add(product);
+        }
+
+        else if (Product.counter < Document.maxRows &&
+                this.mainTable.getItems().get(this.mainTable.getItems().size() - 1).getTitle() != null) {
+            Product product = new Product(Product.counter++);
+            this.document.add(product);
+            this.mainTable.getItems().add(product);
+        }
+    }
+
+    private String getCurrentDate() {
+        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
+
 }

@@ -1,14 +1,23 @@
 package model;
 
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 public class Document {
 
+    private static final String directoryName = "src/main/resources/data";
+    private static final String headerFile = "header.txt";
+    private static final String organizationsFile = "organizations.txt";
+    private static final String unitsFile = "units.txt";
+    private static final String postsFile = "posts.txt";
+
+    public static final int maxRows = 32;
+    public static final int maxFrontSideRows = 10;
+
     /*  Шапка документа */
-    private String organization;
-    private String unit;
+    private ArrayList <String> organization;
+    private ArrayList <String> unit;
     private int number;
     private String date;
     private int OCUD;
@@ -16,37 +25,88 @@ public class Document {
     private Date dateFrom;
     private Date dateTo;
 
-    /*  Поля таблицы  */
-    private int position;
-    private int productCode;
-    private String name;
-    private String measures;
-    private int measuresCode;
-    private double cost;
-    private HashMap <Integer, Double> remains;
-
-
-    private List <Integer> sum;
-
     /*  Подвал документа  */
-    private String responsiblePost;
-    private String checkingPost;
+    private ArrayList <String> responsiblePost;
+    private ArrayList <String> checkingPost;
     private String responsibleFace;
     private String checkingFace;
 
-    public String getOrganization() {
+    private ArrayList <Product> products;
+    private Total total;
+
+    public void add(Product product) {
+        if (this.products == null) {
+            this.products = new ArrayList<>();
+        }
+
+        this.products.add(product);
+    }
+
+    private ArrayList <String> readArrayList(BufferedReader bufferedReader) throws IOException {
+        ArrayList <String> arrayList = new ArrayList <>();
+        String line;
+
+        while ((line = bufferedReader.readLine()) != null) {
+            arrayList.add(line);
+        }
+
+        return arrayList;
+    }
+
+    public void getHeaderFromFile() {
+        try {
+            FileInputStream stream = new FileInputStream(new File
+                    (directoryName + File.separator + headerFile));
+            BufferedReader bufferedReader = new BufferedReader
+                    (new InputStreamReader(stream));
+            this.setNumber(Integer.parseInt(bufferedReader.readLine()));
+            this.setOCUD(Integer.parseInt(bufferedReader.readLine()));
+            this.setOCPO(Integer.parseInt(bufferedReader.readLine()));
+
+            stream = new FileInputStream(new File(directoryName + File.separator + organizationsFile));
+            bufferedReader = new BufferedReader(new InputStreamReader(stream));
+
+            this.setOrganization(readArrayList(bufferedReader));
+
+            stream = new FileInputStream(new File(directoryName + File.separator + unitsFile));
+            bufferedReader = new BufferedReader(new InputStreamReader(stream));
+
+            this.setUnit(readArrayList(bufferedReader));
+        }
+
+        catch (Exception exception){
+            exception.printStackTrace();
+        }
+    }
+
+    public void getFooterFromFile() {
+        try {
+            FileInputStream stream = new FileInputStream(new File
+                    (directoryName + File.separator + postsFile));
+            BufferedReader bufferedReader = new BufferedReader
+                    (new InputStreamReader(stream));
+            this.setResponsiblePost(readArrayList(bufferedReader));
+            this.setCheckingPost(readArrayList(bufferedReader));
+        }
+
+        catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public ArrayList <String> getOrganization() {
         return organization;
     }
 
-    public void setOrganization(String organization) {
+    public void setOrganization(ArrayList <String> organization) {
         this.organization = organization;
     }
 
-    public String getUnit() {
+    public ArrayList <String> getUnit() {
         return unit;
     }
 
-    public void setUnit(String unit) {
+    public void setUnit(ArrayList <String> unit) {
         this.unit = unit;
     }
 
@@ -98,83 +158,19 @@ public class Document {
         this.dateTo = dateTo;
     }
 
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
-    }
-
-    public int getProductCode() {
-        return productCode;
-    }
-
-    public void setProductCode(int productCode) {
-        this.productCode = productCode;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getMeasures() {
-        return measures;
-    }
-
-    public void setMeasures(String measures) {
-        this.measures = measures;
-    }
-
-    public int getMeasuresCode() {
-        return measuresCode;
-    }
-
-    public void setMeasuresCode(int measuresCode) {
-        this.measuresCode = measuresCode;
-    }
-
-    public double getCost() {
-        return cost;
-    }
-
-    public void setCost(double cost) {
-        this.cost = cost;
-    }
-
-    public HashMap <Integer, Double> getRemains() {
-        return remains;
-    }
-
-    public void setRemains(HashMap <Integer, Double> remains) {
-        this.remains = remains;
-    }
-
-    public List <Integer> getSum() {
-        return sum;
-    }
-
-    public void setSum(List<Integer> sum) {
-        this.sum = sum;
-    }
-
-    public String getResponsiblePost() {
+    public ArrayList <String> getResponsiblePost() {
         return responsiblePost;
     }
 
-    public void setResponsiblePost(String responsiblePost) {
+    public void setResponsiblePost(ArrayList <String> responsiblePost) {
         this.responsiblePost = responsiblePost;
     }
 
-    public String getCheckingPost() {
+    public ArrayList <String> getCheckingPost() {
         return checkingPost;
     }
 
-    public void setCheckingPost(String checkingPost) {
+    public void setCheckingPost(ArrayList <String> checkingPost) {
         this.checkingPost = checkingPost;
     }
 
@@ -192,5 +188,21 @@ public class Document {
 
     public void setCheckingFace(String checkingFace) {
         this.checkingFace = checkingFace;
+    }
+
+    public Total getTotal() {
+        return total;
+    }
+
+    public void setTotal(Total total) {
+        this.total = total;
+    }
+
+    public ArrayList<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(ArrayList<Product> products) {
+        this.products = products;
     }
 }
