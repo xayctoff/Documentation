@@ -58,8 +58,8 @@
                </font>
             </Label>
             <ComboBox fx:id="unit" layoutX="165.0" layoutY="70.0" prefHeight="30.0" prefWidth="180.0" />
-            <DatePicker fx:id="dateFrom" layoutX="810.0" layoutY="130.0" />
-            <DatePicker fx:id="dateTo" layoutX="1035.0" layoutY="130.0" />
+            <DatePicker fx:id="dateFrom" layoutX="810.0" layoutY="130.0" onAction="#dateFromAction" />
+            <DatePicker fx:id="dateTo" layoutX="1035.0" layoutY="130.0" onAction="#dateToAction" />
             <Label layoutX="789.0" layoutY="130.0" prefHeight="30.0" prefWidth="10.0" text="с" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />

@@ -2,7 +2,7 @@ package model;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Document {
 
@@ -22,8 +22,8 @@ public class Document {
     private String date;
     private int OCUD;
     private int OCPO;
-    private Date dateFrom;
-    private Date dateTo;
+    private LocalDate dateFrom;
+    private LocalDate dateTo;
 
     /*  Подвал документа  */
     private ArrayList <String> responsiblePost;
@@ -86,7 +86,7 @@ public class Document {
             BufferedReader bufferedReader = new BufferedReader
                     (new InputStreamReader(stream));
             this.setResponsiblePost(readArrayList(bufferedReader));
-            this.setCheckingPost(readArrayList(bufferedReader));
+            this.setCheckingPost(responsiblePost);
         }
 
         catch (Exception exception) {
@@ -142,19 +142,19 @@ public class Document {
         this.OCPO = OCPO;
     }
 
-    public Date getDateFrom() {
+    public LocalDate getDateFrom() {
         return dateFrom;
     }
 
-    public void setDateFrom(Date dateFrom) {
+    public void setDateFrom(LocalDate dateFrom) {
         this.dateFrom = dateFrom;
     }
 
-    public Date getDateTo() {
+    public LocalDate getDateTo() {
         return dateTo;
     }
 
-    public void setDateTo(Date dateTo) {
+    public void setDateTo(LocalDate dateTo) {
         this.dateTo = dateTo;
     }
 
