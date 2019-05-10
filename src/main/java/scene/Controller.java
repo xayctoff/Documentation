@@ -139,11 +139,11 @@ public class Controller {
                 document.getDateTo().withDayOfMonth(1));
 
         if (difference < 1) {
-            showMessage("Минимальный выбранный период должен составлять 1 месяц");
+            showMessage("Минимальный выбранный период должен составлять 1 месяц", "Ошибка интервала");
         }
 
         else if (difference > 5) {
-            showMessage("Максимальный выбранный период должен составлять 5 месяцев");
+            showMessage("Максимальный выбранный период должен составлять 5 месяцев", "Ошибка интервала");
         }
 
         else {
@@ -204,17 +204,10 @@ public class Controller {
         return date.format(formatter);
     }
 
-    private TableColumn createColumn(TableColumn column, int width) {
-        column.setMaxWidth(width);
-        column.setMinWidth(width);
-        column.setPrefWidth(width);
-
-        return column;
-    }
-
-    private void showMessage(String message) {
+    private void showMessage(String message, String header) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Ошибка");
+        alert.setHeaderText(header);
         alert.setContentText(message);
         alert.showAndWait();
     }
