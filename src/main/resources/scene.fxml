@@ -12,16 +12,16 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="700.0" maxWidth="1220.0" minHeight="700.0" minWidth="1220.0" prefHeight="700.0" prefWidth="1220.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scene.Controller">
+<AnchorPane maxHeight="700.0" maxWidth="1220.0" minHeight="700.0" minWidth="1300.0" prefHeight="700.0" prefWidth="1220.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scene.Controller">
    <children>
-      <AnchorPane prefHeight="120.0" prefWidth="1210.0">
+      <AnchorPane prefHeight="160.0" prefWidth="1290.0">
          <children>
-            <Label fx:id="title" alignment="CENTER" layoutX="410.0" layoutY="30.0" prefHeight="30.0" prefWidth="378.0" text="ВЕДОМОСТЬ" textAlignment="CENTER">
+            <Label fx:id="title" alignment="CENTER" layoutX="510.0" layoutY="30.0" prefHeight="30.0" prefWidth="378.0" text="ВЕДОМОСТЬ" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="411.0" layoutY="70.0" prefHeight="30.0" text="Учёт остатков продуктов и товаров на складе" textAlignment="CENTER">
+            <Label alignment="CENTER" contentDisplay="CENTER" layoutX="510.0" layoutY="70.0" prefHeight="30.0" text="Учёт остатков продуктов и товаров на складе" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
                </font>
@@ -37,66 +37,53 @@
                </font>
             </Label>
             <ComboBox fx:id="organization" layoutX="165.0" layoutY="30.0" prefHeight="30.0" prefWidth="180.0" />
-            <Label layoutX="880.0" layoutY="30.0" prefHeight="30.0" prefWidth="150.0" text="Форма по ОКУД" textAlignment="CENTER">
+            <Label layoutX="1040.0" layoutY="30.0" prefHeight="30.0" prefWidth="150.0" text="Форма по ОКУД" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <Label layoutX="880.0" layoutY="70.0" prefHeight="30.0" prefWidth="150.0" text="Код по ОКПО" textAlignment="CENTER">
+            <Label layoutX="1040.0" layoutY="70.0" prefHeight="30.0" prefWidth="150.0" text="Код по ОКПО" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <Label fx:id="valueOCUD" layoutX="1060.0" layoutY="30.0" prefHeight="30.0" prefWidth="150.0" textAlignment="CENTER">
+            <Label fx:id="valueOCUD" alignment="CENTER_RIGHT" layoutX="1190.0" layoutY="30.0" prefHeight="30.0" prefWidth="100.0" textAlignment="RIGHT">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <Label fx:id="valueOCPO" layoutX="1060.0" layoutY="70.0" prefHeight="30.0" prefWidth="150.0" textAlignment="CENTER">
+            <Label fx:id="valueOCPO" alignment="CENTER_RIGHT" layoutX="1190.0" layoutY="70.0" prefHeight="30.0" prefWidth="100.0" textAlignment="RIGHT">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
             <ComboBox fx:id="unit" layoutX="165.0" layoutY="70.0" prefHeight="30.0" prefWidth="180.0" />
-            <DatePicker fx:id="dateFrom" layoutX="810.0" layoutY="130.0" onAction="#dateFromAction" />
-            <DatePicker fx:id="dateTo" layoutX="1035.0" layoutY="130.0" onAction="#dateToAction" />
-            <Label layoutX="789.0" layoutY="130.0" prefHeight="30.0" prefWidth="10.0" text="с" textAlignment="CENTER">
+            <DatePicker fx:id="dateFrom" layoutX="910.0" layoutY="130.0" onAction="#dateFromAction" />
+            <DatePicker fx:id="dateTo" layoutX="1116.0" layoutY="130.0" onAction="#dateToAction" />
+            <Label layoutX="890.0" layoutY="130.0" prefHeight="30.0" prefWidth="10.0" text="с" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
-            <Label layoutX="995.0" layoutY="130.0" prefHeight="30.0" prefWidth="27.0" text="по" textAlignment="CENTER">
+            <Label layoutX="1090.0" layoutY="130.0" prefHeight="30.0" prefWidth="27.0" text="по" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
          </children></AnchorPane>
-      <TableView fx:id="mainTable" layoutX="10.0" layoutY="170.0" prefHeight="300.0" prefWidth="1200.0">
+      <TableView fx:id="mainTable" layoutX="10.0" layoutY="170.0" prefHeight="300.0" prefWidth="1280.0">
         <columns>
           <TableColumn fx:id="number" maxWidth="40.0" minWidth="40.0" prefWidth="40.0" resizable="false" text="№" />
-          <TableColumn fx:id="productCode" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" resizable="false" text="Код товара" />
+          <TableColumn fx:id="productCode" maxWidth="107.0" minWidth="107.0" prefWidth="107.0" resizable="false" text="Код товара" />
             <TableColumn fx:id="name" maxWidth="165.0" minWidth="165.0" prefWidth="165.0" resizable="false" text="Наименование товара" />
             <TableColumn fx:id="measures" maxWidth="130.0" minWidth="130.0" prefWidth="130.0" resizable="false" text="Единица измерения" />
             <TableColumn fx:id="measuresCode" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" resizable="false" text="Код ОКЕИ" />
             <TableColumn fx:id="cost" maxWidth="90.0" minWidth="90.0" prefWidth="90.0" resizable="false" text="Учётная цена" />
-            <TableColumn maxWidth="125.0" minWidth="125.0" prefWidth="125.0" resizable="false" text="Остаток на 30.04.19" />
-            <TableColumn maxWidth="125.0" minWidth="125.0" prefWidth="125.0" resizable="false" text="Остаток на 31.05.19" />
-            <TableColumn maxWidth="125.0" minWidth="125.0" prefWidth="125.0" resizable="false" text="Остаток на 30.06.19" />
-            <TableColumn maxWidth="125.0" minWidth="125.0" prefWidth="125.0" resizable="false" text="Остаток на 31.07.19" />
-            <TableColumn maxWidth="125.0" minWidth="125.0" prefWidth="125.0" resizable="false" text="Остаток на 31.08.19" />
         </columns>
       </TableView>
-      <Separator layoutX="10.0" layoutY="485.0" prefWidth="1200.0" />
-      <TableView fx:id="costTable" layoutX="270.0" layoutY="490.0" prefHeight="100.0" prefWidth="940.0">
-         <columns>
-            <TableColumn maxWidth="188.0" minWidth="188.0" prefWidth="188.0" resizable="false" text="На 30.04.19" />
-            <TableColumn maxWidth="188.0" minWidth="188.0" prefWidth="188.0" resizable="false" text="На 31.05.19" />
-            <TableColumn maxWidth="188.0" minWidth="188.0" prefWidth="188.0" resizable="false" text="На 30.06.19" />
-            <TableColumn maxWidth="188.0" minWidth="188.0" prefWidth="188.0" resizable="false" text="На 31.07.19" />
-            <TableColumn maxWidth="188.0" minWidth="188.0" prefWidth="188.0" resizable="false" text="На 31.08.19" />
-         </columns>
-      </TableView>
-      <Separator layoutX="10.0" layoutY="595.0" prefWidth="1200.0" />
+      <Separator layoutX="10.0" layoutY="485.0" prefWidth="1280.0" />
+      <TableView fx:id="costTable" layoutX="290.0" layoutY="490.0" prefHeight="100.0" prefWidth="1000.0" />
+      <Separator layoutX="10.0" layoutY="595.0" prefWidth="1280.0" />
       <Label alignment="CENTER" layoutX="10.0" layoutY="525.0" text="Итого по ведомости" textAlignment="CENTER">
          <font>
             <Font size="18.0" />
@@ -114,7 +101,7 @@
       </Label>
       <ComboBox fx:id="responsiblePost" layoutX="350.0" layoutY="610.0" prefHeight="30.0" prefWidth="180.0" />
       <ComboBox fx:id="checkingPost" layoutX="350.0" layoutY="650.0" prefHeight="30.0" prefWidth="180.0" />
-      <Button fx:id="saveButton" layoutX="1040.0" layoutY="610.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="170.0" text="Сохранить">
+      <Button fx:id="saveButton" layoutX="1120.0" layoutY="610.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="170.0" text="Сохранить">
          <font>
             <Font size="14.0" />
          </font>

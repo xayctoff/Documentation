@@ -1,25 +1,20 @@
 package scene;
 
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import model.Document;
 import model.Product;
 import model.Total;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class Controller {
 
+    private static final int mainTableColumnWidth = 135;
+    private static final int costTableColumnWidth = 200;
     private static Document document;
 
     /*  Шапка документа  */
@@ -152,13 +147,44 @@ public class Controller {
         }
 
         else {
+            mainTable.getColumns().removeAll(remains);
+            costTable.getColumns().removeAll(total);
+
             remains.clear();
             total.clear();
-            LocalDate date = document.getDateTo();
 
-            for (int i = 0; i < difference; i++) {
-                remains.add(new TableColumn<>("Остатки на " + getDate(date.minusMonths(i + 1))));
-                total.add(new TableColumn<>("На " + getDate(date.minusMonths(i + 1))));
+            LocalDate date = document.getDateFrom();
+
+            for (int i = 0; i <= difference; i++) {
+
+                String headerDate = getDate(date);
+
+                TableColumn <Product, Integer> mainTableColumn =
+                        new TableColumn <>("Остатки на " + headerDate);
+                mainTableColumn.setPrefWidth(mainTableColumnWidth);
+                mainTableColumn.setResizable(false);
+                remains.add(mainTableColumn);
+
+                TableColumn <Total, Double> costTableColumn =
+                        new TableColumn<>("На " + headerDate);
+                costTableColumn.setPrefWidth(costTableColumnWidth);
+                costTableColumn.setResizable(false);
+                total.add(costTableColumn);
+
+                date = date.plusMonths(1);
+
+                if (date.getDayOfMonth() == 30 && date.plusDays(1).getDayOfMonth() == 31) {
+                    date = date.plusDays(1);
+                }
+
+                else if (date.getDayOfMonth() == 28) {
+                    date = date.plusDays(3);
+                }
+
+                else if (date.getDayOfMonth() == 29) {
+                    date = date.plusDays(2);
+                }
+
             }
 
             mainTable.getColumns().addAll(remains);
@@ -176,6 +202,14 @@ public class Controller {
     private String getDate(LocalDate date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         return date.format(formatter);
+    }
+
+    private TableColumn createColumn(TableColumn column, int width) {
+        column.setMaxWidth(width);
+        column.setMinWidth(width);
+        column.setPrefWidth(width);
+
+        return column;
     }
 
     private void showMessage(String message) {
