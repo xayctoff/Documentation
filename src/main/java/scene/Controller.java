@@ -154,9 +154,43 @@ public class Controller {
         measuresCode.setCellFactory(TextFieldTableCell.forTableColumn());
         measuresCode.setEditable(false);
 
-        cost.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        cost.setOnEditCommit(event ->
-                event.getTableView().getItems().get(event.getTablePosition().getRow()).setCost(event.getNewValue()));
+        cost.setCellFactory(new Callback<>() {
+
+            @Override
+            public TableCell <Product, Double> call(TableColumn <Product, Double> parameters) {
+
+                final TextField field = new TextField();
+                field.setMaxWidth(cost.getMaxWidth());
+                field.setPrefWidth(cost.getWidth());
+
+                TableCell <Product, Double> cell = new TableCell<>() {
+
+                    @Override
+                    protected void updateItem(Double reason, boolean empty) {
+
+                        super.updateItem(reason, empty);
+
+                        if (empty) {
+                            setGraphic(null);
+                        }
+
+                        else {
+                            field.setText(Double.toString(reason));
+                            setGraphic(field);
+                        }
+                    }
+                };
+
+                field.setOnAction(event -> {
+                    Product product = mainTable.getItems().get(cell.getIndex());
+                    product.setCost(Double.parseDouble(field.getText()));
+                    mainTable.getItems().get(cell.getIndex()).setRemainsAllSum(product.getCost());
+                    mainTable.refresh();
+                });
+
+                return cell;
+            }
+        });
 
         mainTable.setEditable(true);
     }
@@ -302,10 +336,47 @@ public class Controller {
                     productIntegerCellDataFeatures -> new SimpleIntegerProperty(productIntegerCellDataFeatures
                             .getValue().getRemains().get(index).getKey()).asObject());
 
-            remainsCount.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-            remainsCount.setOnEditCommit(event ->
-                    event.getTableView().getItems().get(event.getTablePosition().getRow())
-                                        .setRemains(index, event.getNewValue()));
+            remainsCount.setCellFactory(new Callback<>() {
+
+                @Override
+                public TableCell <Product, Integer> call(TableColumn <Product, Integer> parameters) {
+
+                    final TextField field = new TextField();
+                    field.setMaxWidth(cost.getMaxWidth());
+                    field.setPrefWidth(cost.getWidth());
+
+                    TableCell <Product, Integer> cell = new TableCell<>() {
+
+                        @Override
+                        protected void updateItem(Integer reason, boolean empty) {
+
+                            super.updateItem(reason, empty);
+
+                            if (empty) {
+                                setGraphic(null);
+                            }
+
+                            else {
+                                field.setText(Integer.toString(reason));
+                                setGraphic(field);
+                            }
+                        }
+                    };
+
+                    field.setOnAction(event -> {
+                        Product product = mainTable.getItems().get(cell.getIndex());
+                        product.setRemainsCount(Integer.parseInt(field.getText()), index);
+                        mainTable.getItems().get(cell.getIndex()).setRemainsSum(product.getCost() *
+                                Integer.parseInt(field.getText()), index);
+                        mainTable.refresh();
+                    });
+
+                    return cell;
+                }
+            });
+
+            mainTable.setEditable(true);
+
 
             TableColumn <Product, Double> remainsSum = columnPair.getValue();
             remainsSum.setCellValueFactory(
