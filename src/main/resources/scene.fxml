@@ -36,7 +36,7 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <ComboBox fx:id="organization" layoutX="165.0" layoutY="30.0" prefHeight="30.0" prefWidth="180.0" />
+            <ComboBox fx:id="organization" layoutX="165.0" layoutY="30.0" prefHeight="30.0" prefWidth="220.0" />
             <Label layoutX="1040.0" layoutY="30.0" prefHeight="30.0" prefWidth="150.0" text="Форма по ОКУД" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
@@ -57,7 +57,7 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <ComboBox fx:id="unit" layoutX="165.0" layoutY="70.0" prefHeight="30.0" prefWidth="180.0" />
+            <ComboBox fx:id="unit" layoutX="165.0" layoutY="70.0" prefHeight="30.0" prefWidth="220.0" />
             <DatePicker fx:id="dateFrom" layoutX="910.0" layoutY="130.0" onAction="#dateFromAction" />
             <DatePicker fx:id="dateTo" layoutX="1116.0" layoutY="130.0" onAction="#dateToAction" />
             <Label layoutX="890.0" layoutY="130.0" prefHeight="30.0" prefWidth="10.0" text="с" textAlignment="CENTER">
@@ -101,7 +101,7 @@
       </Label>
       <ComboBox fx:id="responsiblePost" layoutX="350.0" layoutY="610.0" prefHeight="30.0" prefWidth="180.0" />
       <ComboBox fx:id="checkingPost" layoutX="350.0" layoutY="650.0" prefHeight="30.0" prefWidth="180.0" />
-      <Button fx:id="saveButton" layoutX="1120.0" layoutY="610.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="170.0" text="Сохранить">
+      <Button fx:id="saveButton" layoutX="1120.0" layoutY="610.0" mnemonicParsing="false" onAction="#save" prefHeight="30.0" prefWidth="170.0" text="Сохранить">
          <font>
             <Font size="14.0" />
          </font>
