@@ -62,6 +62,14 @@ public class Product {
         this.position = position;
     }
 
+    public static HashMap <String, String> getProductCodes() {
+        return productCodes;
+    }
+
+    public static HashMap <String, String> getMeasuresCodes() {
+        return measuresCodes;
+    }
+
     public int getPosition() {
         return position;
     }
@@ -110,7 +118,7 @@ public class Product {
         this.cost = cost;
     }
 
-    public HashMap<Integer, Double> getRemains() {
+    public HashMap <Integer, Double> getRemains() {
         return remains;
     }
 
