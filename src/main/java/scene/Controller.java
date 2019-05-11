@@ -1,5 +1,8 @@
 package scene;
 
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -7,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
+import javafx.util.Pair;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import model.Document;
@@ -88,7 +92,8 @@ public class Controller {
     @FXML
     private Button saveButton;
 
-    private ArrayList <TableColumn <Product, HashMap <Integer, Double>>> remains = new ArrayList<>();
+    private ArrayList <TableColumn <Product, Pair <TableColumn <Product, Integer>,
+            TableColumn <Product, Double>>>> remains = new ArrayList<>();
     private ArrayList <TableColumn <Total, Double>> total = new ArrayList<>();
 
     @FXML
@@ -142,15 +147,11 @@ public class Controller {
 
 
         productCode.setCellFactory(TextFieldTableCell.forTableColumn());
-        productCode.setOnEditCommit(event ->
-                event.getTableView().getItems().get(event.getTablePosition().getRow()).setCode(event.getNewValue()));
         productCode.setEditable(false);
 
         createComboBox(measures, Product.getMeasuresCodes());
 
         measuresCode.setCellFactory(TextFieldTableCell.forTableColumn());
-        measuresCode.setOnEditCommit(event ->
-                event.getTableView().getItems().get(event.getTablePosition().getRow()).setOKEI(event.getNewValue()));
         measuresCode.setEditable(false);
 
         cost.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
@@ -284,19 +285,45 @@ public class Controller {
         LocalDate date = document.getDateFrom();
 
         for (int i = 0; i <= difference; i++) {
-
+            int index = i;
             String headerDate = getDate(date);
 
-            TableColumn <Product, HashMap <Integer, Double>> mainTableColumn =
+            TableColumn <Product,
+                    Pair <TableColumn <Product, Integer>, TableColumn <Product, Double>>> mainTableColumn =
                     new TableColumn <>("Остатки на " + headerDate);
             mainTableColumn.setPrefWidth(mainTableColumnWidth);
             mainTableColumn.setResizable(false);
+
+            Pair <TableColumn <Product, Integer>, TableColumn <Product, Double>> columnPair =
+                    new Pair <>(new TableColumn <>("Количество"), new TableColumn <>("Сумма"));
+
+            TableColumn <Product, Integer> remainsCount = columnPair.getKey();
+            remainsCount.setCellValueFactory(
+                    productIntegerCellDataFeatures -> new SimpleIntegerProperty(productIntegerCellDataFeatures
+                            .getValue().getRemains().get(index).getKey()).asObject());
+
+            remainsCount.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+            remainsCount.setOnEditCommit(event ->
+                    event.getTableView().getItems().get(event.getTablePosition().getRow())
+                                        .setRemains(index, event.getNewValue()));
+
+            TableColumn <Product, Double> remainsSum = columnPair.getValue();
+            remainsSum.setCellValueFactory(
+                    productIntegerCellDataFeatures -> new SimpleDoubleProperty(productIntegerCellDataFeatures
+                            .getValue().getRemains().get(index).getValue()).asObject());
+            remainsSum.setEditable(false);
+
+            mainTableColumn.getColumns().add(remainsCount);
+            mainTableColumn.getColumns().add(remainsSum);
+
             remains.add(mainTableColumn);
 
             TableColumn <Total, Double> costTableColumn =
                     new TableColumn<>("На " + headerDate);
             costTableColumn.setPrefWidth(costTableColumnWidth);
             costTableColumn.setResizable(false);
+            costTableColumn.setCellValueFactory(new PropertyValueFactory<>("sum"));
+            costTableColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
             total.add(costTableColumn);
 
             date = date.plusMonths(1);
@@ -339,8 +366,7 @@ public class Controller {
     }
 
     public void save() {
-
+        //TODO: реализовать сохранение документа в формате .xls
     }
-
 
 }
