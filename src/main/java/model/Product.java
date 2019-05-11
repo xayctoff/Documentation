@@ -141,4 +141,30 @@ public class Product {
         remains.set(index, new Pair <> (count, getCost() * count));
     }
 
+    public int getRemainsCount(int index) {
+        return remains.get(index).getKey();
+    }
+
+    public void setRemainsCount(int count, int index) {
+        remains.set(index, new Pair<> (count, getRemainsSum(index)));
+    }
+
+    public double getRemainsSum(int index) {
+        return remains.get(index).getValue();
+    }
+
+    public void setRemainsSum(double sum, int index) {
+        remains.set(index, new Pair<> (getRemainsCount(index), sum));
+    }
+
+    public void setRemainsAllSum(double sum) {
+        int index = 0;
+
+        for (Pair <Integer, Double> pair : remains) {
+            int count = pair.getKey();
+            remains.set(index, new Pair <>(count, sum * count));
+            index++;
+        }
+    }
+
 }
