@@ -10,11 +10,11 @@ public class Product {
     private static final String measuresFile = "measures.txt";
 
     private int position;
-    private int code;
+    private String code;
     private String title;
     private String measures;
-    private int OKEI;
-    private int cost;
+    private String OKEI;
+    private double cost;
     private HashMap <Integer, Double> remains;
 
     public static int counter = 1;
@@ -70,11 +70,11 @@ public class Product {
         this.position = position;
     }
 
-    public int getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(int code) {
+    public void setCode(String code) {
         this.code = code;
     }
 
@@ -94,19 +94,19 @@ public class Product {
         this.measures = measures;
     }
 
-    public int getOKEI() {
+    public String getOKEI() {
         return OKEI;
     }
 
-    public void setOKEI(int OKEI) {
+    public void setOKEI(String OKEI) {
         this.OKEI = OKEI;
     }
 
-    public int getCost() {
+    public double getCost() {
         return cost;
     }
 
-    public void setCost(int cost) {
+    public void setCost(double cost) {
         this.cost = cost;
     }
 

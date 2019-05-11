@@ -1,7 +1,13 @@
 package scene;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.IntegerStringConverter;
 import model.Document;
 import model.Product;
 import model.Total;
@@ -10,6 +16,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Controller {
 
@@ -47,19 +54,19 @@ public class Controller {
     private TableColumn <Product, Integer> number;
 
     @FXML
-    private TableColumn <Product, Integer> productCode;
+    private TableColumn <Product, ComboBox <String>> name;
 
     @FXML
-    private TableColumn <Product, Integer> name;
+    private TableColumn <Product, String> productCode;
 
     @FXML
-    private TableColumn <Product, Integer> measures;
+    private TableColumn <Product, ComboBox <String>> measures;
 
     @FXML
-    private TableColumn <Product, Integer> measuresCode;
+    private TableColumn <Product, String> measuresCode;
 
     @FXML
-    private TableColumn <Product, Integer> cost;
+    private TableColumn <Product, Double> cost;
 
     @FXML
     private TableView <Total> costTable;
@@ -80,7 +87,7 @@ public class Controller {
     @FXML
     private Button saveButton;
 
-    private ArrayList <TableColumn <Product, Integer>> remains = new ArrayList<>();
+    private ArrayList <TableColumn <Product, HashMap <Integer, Double>>> remains = new ArrayList<>();
     private ArrayList <TableColumn <Total, Double>> total = new ArrayList<>();
 
     @FXML
@@ -109,9 +116,51 @@ public class Controller {
             responsiblePost.getItems().add(item);
         }
 
+        initTable();
     }
 
-    public void addLine() {
+    private void initTable() {
+        number.setCellValueFactory(new PropertyValueFactory<>("position"));
+        name.setCellValueFactory(new PropertyValueFactory<>("title"));
+        productCode.setCellValueFactory(new PropertyValueFactory<>("code"));
+        measures.setCellValueFactory(new PropertyValueFactory<>("measures"));
+        measuresCode.setCellValueFactory(new PropertyValueFactory<>("OKEI"));
+        cost.setCellValueFactory(new PropertyValueFactory<>("cost"));
+
+        initEditableColumns();
+    }
+
+    private void initEditableColumns() {
+        number.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        number.setOnEditCommit(event ->
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setPosition(event.getNewValue()));
+
+        name.setCellFactory(ComboBoxTableCell.forTableColumn());
+        name.setOnEditCommit(event ->
+                        event.getTableView().getItems().get(event.getTablePosition().getRow())
+                                .setTitle(event.getNewValue().getValue()));
+
+        productCode.setCellFactory(TextFieldTableCell.forTableColumn());
+        productCode.setOnEditCommit(event ->
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setCode(event.getNewValue()));
+
+        measures.setCellFactory(ComboBoxTableCell.forTableColumn());
+        measures.setOnEditCommit(event ->
+                event.getTableView().getItems().get(event.getTablePosition().getRow())
+                        .setMeasures(event.getNewValue().getValue()));
+
+        measuresCode.setCellFactory(TextFieldTableCell.forTableColumn());
+        measuresCode.setOnEditCommit(event ->
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setOKEI(event.getNewValue()));
+
+        cost.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        cost.setOnEditCommit(event ->
+                event.getTableView().getItems().get(event.getTablePosition().getRow()).setCost(event.getNewValue()));
+
+        mainTable.setEditable(true);
+    }
+
+    private void addLine() {
         if (Product.counter == 1) {
             Product product = new Product(Product.counter++);
             document.add(product);
@@ -129,68 +178,87 @@ public class Controller {
     @FXML
     public void dateFromAction() {
         document.setDateFrom(dateFrom.getValue());
+
+        if (document.getDateTo() != null) {
+            countMonthDifference();
+        }
     }
 
     @FXML
     public void dateToAction() {
         document.setDateTo(dateTo.getValue());
+        countMonthDifference();
 
+        ObservableList <Product> list = mainTable.getItems();
+
+        if (list.isEmpty()) {
+            addLine();
+        }
+    }
+
+    private void countMonthDifference() {
         long difference = ChronoUnit.MONTHS.between(document.getDateFrom().withDayOfMonth(1),
                 document.getDateTo().withDayOfMonth(1));
 
         if (difference < 1) {
-            showMessage("Минимальный выбранный период должен составлять 1 месяц", "Ошибка интервала");
+            showMessage("Минимальный выбранный период должен составлять 1 месяц",
+                    "Ошибка нижней границы интервала");
         }
 
         else if (difference > 5) {
-            showMessage("Максимальный выбранный период должен составлять 5 месяцев", "Ошибка интервала");
+            showMessage("Максимальный выбранный период должен составлять 5 месяцев", "Ошибка " +
+                    "верхней границы интервала");
         }
 
         else {
-            mainTable.getColumns().removeAll(remains);
-            costTable.getColumns().removeAll(total);
-
-            remains.clear();
-            total.clear();
-
-            LocalDate date = document.getDateFrom();
-
-            for (int i = 0; i <= difference; i++) {
-
-                String headerDate = getDate(date);
-
-                TableColumn <Product, Integer> mainTableColumn =
-                        new TableColumn <>("Остатки на " + headerDate);
-                mainTableColumn.setPrefWidth(mainTableColumnWidth);
-                mainTableColumn.setResizable(false);
-                remains.add(mainTableColumn);
-
-                TableColumn <Total, Double> costTableColumn =
-                        new TableColumn<>("На " + headerDate);
-                costTableColumn.setPrefWidth(costTableColumnWidth);
-                costTableColumn.setResizable(false);
-                total.add(costTableColumn);
-
-                date = date.plusMonths(1);
-
-                if (date.getDayOfMonth() == 30 && date.plusDays(1).getDayOfMonth() == 31) {
-                    date = date.plusDays(1);
-                }
-
-                else if (date.getDayOfMonth() == 28) {
-                    date = date.plusDays(3);
-                }
-
-                else if (date.getDayOfMonth() == 29) {
-                    date = date.plusDays(2);
-                }
-
-            }
-
-            mainTable.getColumns().addAll(remains);
-            costTable.getColumns().addAll(total);
+            addColumns(difference);
         }
 
+    }
+
+    private void addColumns(long difference) {
+        mainTable.getColumns().removeAll(remains);
+        costTable.getColumns().removeAll(total);
+
+        remains.clear();
+        total.clear();
+
+        LocalDate date = document.getDateFrom();
+
+        for (int i = 0; i <= difference; i++) {
+
+            String headerDate = getDate(date);
+
+            TableColumn <Product, HashMap <Integer, Double>> mainTableColumn =
+                    new TableColumn <>("Остатки на " + headerDate);
+            mainTableColumn.setPrefWidth(mainTableColumnWidth);
+            mainTableColumn.setResizable(false);
+            remains.add(mainTableColumn);
+
+            TableColumn <Total, Double> costTableColumn =
+                    new TableColumn<>("На " + headerDate);
+            costTableColumn.setPrefWidth(costTableColumnWidth);
+            costTableColumn.setResizable(false);
+            total.add(costTableColumn);
+
+            date = date.plusMonths(1);
+
+            if (date.getDayOfMonth() == 30 && date.plusDays(1).getDayOfMonth() == 31) {
+                date = date.plusDays(1);
+            }
+
+            else if (date.getDayOfMonth() == 28) {
+                date = date.plusDays(3);
+            }
+
+            else if (date.getDayOfMonth() == 29) {
+                date = date.plusDays(2);
+            }
+
+        }
+
+        mainTable.getColumns().addAll(remains);
+        costTable.getColumns().addAll(total);
     }
 
     private String getCurrentDate() {
