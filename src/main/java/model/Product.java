@@ -1,6 +1,10 @@
 package model;
 
+import javafx.util.Pair;
+
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class Product {
@@ -8,6 +12,7 @@ public class Product {
     private static final String directoryName = "src/main/resources/data";
     private static final String productsFile = "products.txt";
     private static final String measuresFile = "measures.txt";
+    private static final int remainsCapacity = 5;
 
     private int position;
     private String code;
@@ -15,12 +20,22 @@ public class Product {
     private String measures;
     private String OKEI;
     private double cost;
-    private HashMap <Integer, Double> remains;
 
     public static int counter = 1;
 
+    private static ArrayList <Pair <Integer, Double>> remains;
     private static HashMap <String, String> productCodes;
     private static HashMap <String, String> measuresCodes;
+
+    static {
+        remains = new ArrayList <>(remainsCapacity) {
+            {
+                for (int i = 0; i < remainsCapacity; i++) {
+                    add(new Pair<>(0, 0.0));
+                }
+            }
+        };
+    }
 
     public static void init() {
         String[] position;
@@ -118,11 +133,12 @@ public class Product {
         this.cost = cost;
     }
 
-    public HashMap <Integer, Double> getRemains() {
+    public ArrayList <Pair <Integer, Double>> getRemains() {
         return remains;
     }
 
-    public void setRemains(HashMap<Integer, Double> remains) {
-        this.remains = remains;
+    public void setRemains(int index, int count) {
+        remains.set(index, new Pair <> (count, getCost() * count));
     }
+
 }
