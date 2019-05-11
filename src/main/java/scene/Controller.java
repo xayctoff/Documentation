@@ -1,11 +1,12 @@
 package scene;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.Callback;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import model.Document;
@@ -54,13 +55,13 @@ public class Controller {
     private TableColumn <Product, Integer> number;
 
     @FXML
-    private TableColumn <Product, ComboBox <String>> name;
+    private TableColumn <Product, String> name;
 
     @FXML
     private TableColumn <Product, String> productCode;
 
     @FXML
-    private TableColumn <Product, ComboBox <String>> measures;
+    private TableColumn <Product, String> measures;
 
     @FXML
     private TableColumn <Product, String> measuresCode;
@@ -92,6 +93,8 @@ public class Controller {
 
     @FXML
     public void initialize() {
+        mainTable.setPlaceholder(new Label("Для начала работы с таблицей установите отчётный период"));
+        costTable.setPlaceholder(new Label("Для начала работы с таблицей установите отчётный период"));
         document = new Document();
         title.setText(title.getText() + " №" + document.getNumber() + " от " + getCurrentDate());
         Product.init();
@@ -135,29 +138,80 @@ public class Controller {
         number.setOnEditCommit(event ->
                 event.getTableView().getItems().get(event.getTablePosition().getRow()).setPosition(event.getNewValue()));
 
-        name.setCellFactory(ComboBoxTableCell.forTableColumn());
-        name.setOnEditCommit(event ->
-                        event.getTableView().getItems().get(event.getTablePosition().getRow())
-                                .setTitle(event.getNewValue().getValue()));
+        createComboBox(name, Product.getProductCodes());
+
 
         productCode.setCellFactory(TextFieldTableCell.forTableColumn());
         productCode.setOnEditCommit(event ->
                 event.getTableView().getItems().get(event.getTablePosition().getRow()).setCode(event.getNewValue()));
+        productCode.setEditable(false);
 
-        measures.setCellFactory(ComboBoxTableCell.forTableColumn());
-        measures.setOnEditCommit(event ->
-                event.getTableView().getItems().get(event.getTablePosition().getRow())
-                        .setMeasures(event.getNewValue().getValue()));
+        createComboBox(measures, Product.getMeasuresCodes());
 
         measuresCode.setCellFactory(TextFieldTableCell.forTableColumn());
         measuresCode.setOnEditCommit(event ->
                 event.getTableView().getItems().get(event.getTablePosition().getRow()).setOKEI(event.getNewValue()));
+        measuresCode.setEditable(false);
 
         cost.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         cost.setOnEditCommit(event ->
                 event.getTableView().getItems().get(event.getTablePosition().getRow()).setCost(event.getNewValue()));
 
         mainTable.setEditable(true);
+    }
+
+    private void createComboBox(TableColumn <Product, String> column, HashMap <String, String> codes) {
+        ObservableList <String> items = FXCollections.observableArrayList(codes.keySet());
+        column.setCellFactory(new Callback <>() {
+
+            @Override
+            public TableCell <Product, String> call(TableColumn <Product, String> parameters) {
+
+                final ComboBox <String> comboBox = new ComboBox<>(items);
+
+                comboBox.setMaxWidth(column.getMaxWidth());
+                comboBox.setPrefWidth(column.getWidth());
+
+                TableCell <Product, String> cell = new TableCell <>() {
+
+                    @Override
+                    protected void updateItem(String reason, boolean empty) {
+
+                        super.updateItem(reason, empty);
+
+                        if (empty) {
+                            setGraphic(null);
+                        }
+
+                        else {
+                            comboBox.setValue(reason);
+                            setGraphic(comboBox);
+                        }
+                    }
+                };
+
+                comboBox.setOnAction(event -> {
+                    Product product = mainTable.getItems().get(cell.getIndex());
+
+                    if (column.getText().equals("Наименование товара")) {
+                        product.setTitle(comboBox.getSelectionModel().getSelectedItem());
+                        mainTable.getItems().get(cell.getIndex())
+                                .setCode(codes.get(product.getTitle()));
+                        addLine();
+                    }
+
+                    else {
+                        product.setMeasures(comboBox.getSelectionModel().getSelectedItem());
+                        mainTable.getItems().get(cell.getIndex())
+                                .setOKEI(codes.get(product.getMeasures()));
+                    }
+
+                    mainTable.refresh();
+                });
+
+                return cell;
+            }
+        });
     }
 
     private void addLine() {
@@ -187,31 +241,35 @@ public class Controller {
     @FXML
     public void dateToAction() {
         document.setDateTo(dateTo.getValue());
-        countMonthDifference();
 
-        ObservableList <Product> list = mainTable.getItems();
+        if (countMonthDifference()) {
+            ObservableList<Product> list = mainTable.getItems();
 
-        if (list.isEmpty()) {
-            addLine();
+            if (list.isEmpty()) {
+                addLine();
+            }
         }
     }
 
-    private void countMonthDifference() {
+    private boolean countMonthDifference() {
         long difference = ChronoUnit.MONTHS.between(document.getDateFrom().withDayOfMonth(1),
                 document.getDateTo().withDayOfMonth(1));
 
         if (difference < 1) {
             showMessage("Минимальный выбранный период должен составлять 1 месяц",
                     "Ошибка нижней границы интервала");
+            return false;
         }
 
         else if (difference > 5) {
             showMessage("Максимальный выбранный период должен составлять 5 месяцев", "Ошибка " +
                     "верхней границы интервала");
+            return false;
         }
 
         else {
             addColumns(difference);
+            return true;
         }
 
     }
@@ -274,10 +332,14 @@ public class Controller {
 
     private void showMessage(String message, String header) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Ошибка");
+        alert.setTitle("Что-то пошло не так");
         alert.setHeaderText(header);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void save() {
+
     }
 
 
