@@ -58,9 +58,9 @@
                </font>
             </Label>
             <ComboBox fx:id="unit" layoutX="165.0" layoutY="70.0" prefHeight="30.0" prefWidth="220.0" />
-            <DatePicker fx:id="dateFrom" layoutX="910.0" layoutY="130.0" onAction="#dateFromAction" />
+            <DatePicker fx:id="dateFrom" layoutX="900.0" layoutY="130.0" onAction="#dateFromAction" />
             <DatePicker fx:id="dateTo" layoutX="1116.0" layoutY="130.0" onAction="#dateToAction" />
-            <Label layoutX="890.0" layoutY="130.0" prefHeight="30.0" prefWidth="10.0" text="с" textAlignment="CENTER">
+            <Label layoutX="880.0" layoutY="130.0" prefHeight="30.0" prefWidth="10.0" text="с" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
                </font>
