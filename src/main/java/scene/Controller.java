@@ -2,7 +2,6 @@ package scene;
 
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,7 +10,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.Pair;
-import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import model.Document;
 import model.Product;
@@ -124,10 +122,10 @@ public class Controller {
             responsiblePost.getItems().add(item);
         }
 
-        initTable();
+        initMainTable();
     }
 
-    private void initTable() {
+    private void initMainTable() {
         number.setCellValueFactory(new PropertyValueFactory<>("position"));
         name.setCellValueFactory(new PropertyValueFactory<>("title"));
         productCode.setCellValueFactory(new PropertyValueFactory<>("code"));
@@ -135,10 +133,10 @@ public class Controller {
         measuresCode.setCellValueFactory(new PropertyValueFactory<>("OKEI"));
         cost.setCellValueFactory(new PropertyValueFactory<>("cost"));
 
-        initEditableColumns();
+        initMainTableEditableColumns();
     }
 
-    private void initEditableColumns() {
+    private void initMainTableEditableColumns() {
         number.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         number.setOnEditCommit(event ->
                 event.getTableView().getItems().get(event.getTablePosition().getRow()).setPosition(event.getNewValue()));
@@ -184,8 +182,11 @@ public class Controller {
                 field.setOnAction(event -> {
                     Product product = mainTable.getItems().get(cell.getIndex());
                     product.setCost(Double.parseDouble(field.getText()));
-                    mainTable.getItems().get(cell.getIndex()).setRemainsAllSum(product.getCost());
+                    mainTable.getItems().get(cell.getIndex()).setRemainsSum(product.getCost());
                     mainTable.refresh();
+
+                    costTable.getItems().get(0).setSum(product.getCost(), product);
+                    costTable.refresh();
                 });
 
                 return cell;
@@ -193,6 +194,7 @@ public class Controller {
         });
 
         mainTable.setEditable(true);
+        costTable.setEditable(false);
     }
 
     private void createComboBox(TableColumn <Product, String> column, HashMap <String, String> codes) {
@@ -252,8 +254,10 @@ public class Controller {
     private void addLine() {
         if (Product.counter == 1) {
             Product product = new Product(Product.counter++);
+            Total total = new Total();
             document.add(product);
             this.mainTable.getItems().add(product);
+            this.costTable.getItems().add(total);
         }
 
         else if (Product.counter < Document.maxRows &&
@@ -341,6 +345,7 @@ public class Controller {
                 @Override
                 public TableCell <Product, Integer> call(TableColumn <Product, Integer> parameters) {
 
+                    final int[] oldCount = new int[1];
                     final TextField field = new TextField();
                     field.setMaxWidth(cost.getMaxWidth());
                     field.setPrefWidth(cost.getWidth());
@@ -359,6 +364,7 @@ public class Controller {
                             else {
                                 field.setText(Integer.toString(reason));
                                 setGraphic(field);
+                                oldCount[0] = reason;
                             }
                         }
                     };
@@ -366,17 +372,28 @@ public class Controller {
                     field.setOnAction(event -> {
                         Product product = mainTable.getItems().get(cell.getIndex());
                         product.setRemainsCount(Integer.parseInt(field.getText()), index);
-                        mainTable.getItems().get(cell.getIndex()).setRemainsSum(product.getCost() *
+                        mainTable.getItems().get(cell.getIndex()).setRemainsOneSum(product.getCost() *
                                 Integer.parseInt(field.getText()), index);
                         mainTable.refresh();
+
+                        Total total = costTable.getItems().get(0);
+                        double cost = product.getCost();
+                        double oldValue = oldCount[0] * cost;
+                        double newValue = Double.parseDouble(field.getText()) * cost;
+                        double sum = total.getOneSum(index);
+
+                        if (document.getProducts().size() < Document.maxFrontSideRows) {
+                            total.setSideSum(sum - oldValue + newValue, index);
+                        }
+
+                        costTable.getItems().get(0).setOneSum(sum - oldValue + newValue, index);
+                        costTable.refresh();
+
                     });
 
                     return cell;
                 }
             });
-
-            mainTable.setEditable(true);
-
 
             TableColumn <Product, Double> remainsSum = columnPair.getValue();
             remainsSum.setCellValueFactory(
@@ -393,8 +410,10 @@ public class Controller {
                     new TableColumn<>("На " + headerDate);
             costTableColumn.setPrefWidth(costTableColumnWidth);
             costTableColumn.setResizable(false);
-            costTableColumn.setCellValueFactory(new PropertyValueFactory<>("sum"));
-            costTableColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+            costTableColumn.setCellValueFactory(productIntegerCellDataFeatures
+                    -> new SimpleDoubleProperty(productIntegerCellDataFeatures
+                    .getValue().getSum().get(index)).asObject());
+            costTableColumn.setEditable(false);
             total.add(costTableColumn);
 
             date = date.plusMonths(1);
