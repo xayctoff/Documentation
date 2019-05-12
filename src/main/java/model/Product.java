@@ -4,7 +4,6 @@ import javafx.util.Pair;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 public class Product {
@@ -23,19 +22,9 @@ public class Product {
 
     public static int counter = 1;
 
-    private static ArrayList <Pair <Integer, Double>> remains;
+    private ArrayList <Pair <Integer, Double>> remains;
     private static HashMap <String, String> productCodes;
     private static HashMap <String, String> measuresCodes;
-
-    static {
-        remains = new ArrayList <>(remainsCapacity) {
-            {
-                for (int i = 0; i < remainsCapacity; i++) {
-                    add(new Pair<>(0, 0.0));
-                }
-            }
-        };
-    }
 
     public static void init() {
         String[] position;
@@ -75,6 +64,14 @@ public class Product {
 
     public Product(int position) {
         this.position = position;
+
+        remains = new ArrayList <>(remainsCapacity) {
+            {
+                for (int i = 0; i < remainsCapacity; i++) {
+                    add(new Pair<>(0, 0.0));
+                }
+            }
+        };
     }
 
     public static HashMap <String, String> getProductCodes() {
@@ -153,11 +150,11 @@ public class Product {
         return remains.get(index).getValue();
     }
 
-    public void setRemainsSum(double sum, int index) {
+    public void setRemainsOneSum(double sum, int index) {
         remains.set(index, new Pair<> (getRemainsCount(index), sum));
     }
 
-    public void setRemainsAllSum(double sum) {
+    public void setRemainsSum(double sum) {
         int index = 0;
 
         for (Pair <Integer, Double> pair : remains) {
