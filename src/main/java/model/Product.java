@@ -12,12 +12,12 @@ public class Product {
     private static final String measuresFile = "/data/measures.txt";
     private static final int remainsCapacity = 5;
 
-    private int position;
+    private Integer position;
     private String code;
     private String title;
     private String measures;
     private String OKEI;
-    private double cost;
+    private Double cost;
 
     public static int counter = 1;
 
@@ -80,11 +80,11 @@ public class Product {
         return measuresCodes;
     }
 
-    public int getPosition() {
+    public Integer getPosition() {
         return position;
     }
 
-    public void setPosition(int position) {
+    public void setPosition(Integer position) {
         this.position = position;
     }
 
@@ -120,11 +120,11 @@ public class Product {
         this.OKEI = OKEI;
     }
 
-    public double getCost() {
+    public Double getCost() {
         return cost;
     }
 
-    public void setCost(double cost) {
+    public void setCost(Double cost) {
         this.cost = cost;
     }
 
