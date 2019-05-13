@@ -6,11 +6,10 @@ import java.time.LocalDate;
 
 public class Document {
 
-    private static final String directoryName = "src/main/resources/data";
-    private static final String headerFile = "header.txt";
-    private static final String organizationsFile = "organizations.txt";
-    private static final String unitsFile = "units.txt";
-    private static final String postsFile = "posts.txt";
+    private static final String headerFile = "/data/header.txt";
+    private static final String organizationsFile = "/data/organizations.txt";
+    private static final String unitsFile = "/data/units.txt";
+    private static final String postsFile = "/data/posts.txt";
 
     public static final int maxRows = 32;
     public static final int maxFrontSideRows = 10;
@@ -18,10 +17,10 @@ public class Document {
     /*  Шапка документа */
     private ArrayList <String> organization;
     private ArrayList <String> unit;
-    private int number;
+    private String  number;
     private String date;
-    private int OCUD;
-    private int OCPO;
+    private String OCUD;
+    private String OCPO;
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
@@ -55,23 +54,24 @@ public class Document {
 
     public void getHeaderFromFile() {
         try {
-            FileInputStream stream = new FileInputStream(new File
-                    (directoryName + File.separator + headerFile));
+            FileInputStream stream = new FileInputStream(this.getClass().getResource(headerFile).getPath());
             BufferedReader bufferedReader = new BufferedReader
                     (new InputStreamReader(stream));
-            this.setNumber(Integer.parseInt(bufferedReader.readLine()));
-            this.setOCUD(Integer.parseInt(bufferedReader.readLine()));
-            this.setOCPO(Integer.parseInt(bufferedReader.readLine()));
+            this.setNumber(bufferedReader.readLine());
+            this.setOCUD(bufferedReader.readLine());
+            this.setOCPO(bufferedReader.readLine());
 
-            stream = new FileInputStream(new File(directoryName + File.separator + organizationsFile));
+            stream = new FileInputStream(this.getClass().getResource(organizationsFile).getPath());
             bufferedReader = new BufferedReader(new InputStreamReader(stream));
 
             this.setOrganization(readArrayList(bufferedReader));
 
-            stream = new FileInputStream(new File(directoryName + File.separator + unitsFile));
+            stream = new FileInputStream(this.getClass().getResource(unitsFile).getPath());
             bufferedReader = new BufferedReader(new InputStreamReader(stream));
 
             this.setUnit(readArrayList(bufferedReader));
+
+            stream.close();
         }
 
         catch (Exception exception){
@@ -81,12 +81,13 @@ public class Document {
 
     public void getFooterFromFile() {
         try {
-            FileInputStream stream = new FileInputStream(new File
-                    (directoryName + File.separator + postsFile));
+            FileInputStream stream = new FileInputStream(this.getClass().getResource(postsFile).getPath());
             BufferedReader bufferedReader = new BufferedReader
                     (new InputStreamReader(stream));
             this.setResponsiblePost(readArrayList(bufferedReader));
             this.setCheckingPost(responsiblePost);
+
+            stream.close();
         }
 
         catch (Exception exception) {
@@ -110,11 +111,11 @@ public class Document {
         this.unit = unit;
     }
 
-    public int getNumber() {
+    public String getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public void setNumber(String number) {
         this.number = number;
     }
 
@@ -126,19 +127,19 @@ public class Document {
         this.date = date;
     }
 
-    public int getOCUD() {
+    public String getOCUD() {
         return OCUD;
     }
 
-    public void setOCUD(int OCUD) {
+    public void setOCUD(String OCUD) {
         this.OCUD = OCUD;
     }
 
-    public int getOCPO() {
+    public String getOCPO() {
         return OCPO;
     }
 
-    public void setOCPO(int OCPO) {
+    public void setOCPO(String OCPO) {
         this.OCPO = OCPO;
     }
 
@@ -198,11 +199,7 @@ public class Document {
         this.total = total;
     }
 
-    public ArrayList<Product> getProducts() {
+    public ArrayList <Product> getProducts() {
         return products;
-    }
-
-    public void setProducts(ArrayList<Product> products) {
-        this.products = products;
     }
 }
