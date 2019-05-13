@@ -106,12 +106,12 @@
             <Font size="14.0" />
          </font>
       </Button>
-      <TextField fx:id="responsibleFace" layoutX="600.0" layoutY="560.0" prefHeight="30.0" prefWidth="200.0">
+      <TextField fx:id="responsibleFace" layoutX="600.0" layoutY="560.0" onAction="#responsibleFaceFilling" prefHeight="30.0" prefWidth="200.0">
          <font>
             <Font size="14.0" />
          </font>
       </TextField>
-      <TextField fx:id="checkingFace" layoutX="600.0" layoutY="600.0" prefHeight="30.0" prefWidth="200.0">
+      <TextField fx:id="checkingFace" layoutX="600.0" layoutY="600.0" onAction="#checkingFaceFilling" prefHeight="30.0" prefWidth="200.0">
          <font>
             <Font size="14.0" />
          </font>
