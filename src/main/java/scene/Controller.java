@@ -8,13 +8,17 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Pair;
 import javafx.util.converter.IntegerStringConverter;
 import model.Document;
+import model.Excel;
 import model.Product;
 import model.Total;
 
+import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -25,6 +29,7 @@ public class Controller {
 
     private static final int mainTableColumnWidth = 135;
     private static final int costTableColumnWidth = 200;
+
     private static Document document;
 
     /*  Шапка документа  */
@@ -99,12 +104,12 @@ public class Controller {
         mainTable.setPlaceholder(new Label("Для начала работы с таблицей установите отчётный период"));
         costTable.setPlaceholder(new Label("Для начала работы с таблицей установите отчётный период"));
         document = new Document();
-        title.setText(title.getText() + " №" + document.getNumber() + " от " + getCurrentDate());
         Product.init();
         document.getHeaderFromFile();
         document.getFooterFromFile();
-        valueOCUD.setText(Integer.toString(document.getOCUD()));
-        valueOCPO.setText(Integer.toString(document.getOCPO()));
+        title.setText(title.getText() + " №" + document.getNumber() + " от " + getCurrentDate());
+        valueOCUD.setText(document.getOCUD());
+        valueOCPO.setText(document.getOCPO());
 
         for (String item : document.getOrganization()) {
             organization.getItems().add(item);
@@ -123,6 +128,18 @@ public class Controller {
         }
 
         initMainTable();
+    }
+
+    @FXML
+    public void responsibleFaceFilling() {
+        responsibleFace.textProperty().addListener((observable, oldValue, newValue)
+                -> document.setResponsibleFace(newValue));
+    }
+
+    @FXML
+    public void checkingFaceFilling() {
+        checkingFace.textProperty().addListener((observable, oldValue, newValue)
+                -> document.setCheckingFace(newValue));
     }
 
     private void initMainTable() {
@@ -439,12 +456,17 @@ public class Controller {
     private String getCurrentDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate date = LocalDate.now();
+        document.setDate(date.format(formatter));
+        return document.getDate();
+    }
+
+    public static String getDate(LocalDate date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         return date.format(formatter);
     }
 
-    private String getDate(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        return date.format(formatter);
+    private static Document getDocument() {
+        return document;
     }
 
     private void showMessage(String message, String header) {
@@ -456,7 +478,19 @@ public class Controller {
     }
 
     public void save() {
-        //TODO: реализовать сохранение документа в формате .xls
+        FileChooser fileChooser = new FileChooser();
+
+        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Файл Microsoft Excel",
+                "*.xlsx");
+        fileChooser.getExtensionFilters().add(filter);
+
+        File file = fileChooser.showSaveDialog(new Stage());
+
+        if (file != null) {
+            Excel excel = new Excel(Controller.getDocument());
+            excel.setOutput(file);
+            excel.write();
+        }
     }
 
 }
