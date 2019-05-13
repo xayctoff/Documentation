@@ -1,5 +1,6 @@
 package scene;
 
+import data.Data;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
@@ -14,7 +15,7 @@ import javafx.util.Callback;
 import javafx.util.Pair;
 import javafx.util.converter.IntegerStringConverter;
 import model.Document;
-import model.Excel;
+import data.Excel;
 import model.Product;
 import model.Total;
 
@@ -104,30 +105,44 @@ public class Controller {
         mainTable.setPlaceholder(new Label("Для начала работы с таблицей установите отчётный период"));
         costTable.setPlaceholder(new Label("Для начала работы с таблицей установите отчётный период"));
         document = new Document();
+        Data data = new Data();
         Product.init();
-        document.getHeaderFromFile();
-        document.getFooterFromFile();
-        title.setText(title.getText() + " №" + document.getNumber() + " от " + getCurrentDate());
+
+        Pair <ArrayList <String>, ArrayList <String>> header = data.getHeader(document);
+        ArrayList <String> footer = data.getFooter();
+
+        organization.getItems().addAll(header.getKey());
+        unit.getItems().addAll(header.getValue());
+        responsiblePost.getItems().addAll(footer);
+        checkingPost.getItems().addAll(footer);
+
+        setCurrentDate();
+
+        title.setText(title.getText() + " №" + document.getNumber() + " от " + document.getDate());
         valueOCUD.setText(document.getOCUD());
         valueOCPO.setText(document.getOCPO());
 
-        for (String item : document.getOrganization()) {
-            organization.getItems().add(item);
-        }
-
-        for (String item : document.getUnit()) {
-            unit.getItems().add(item);
-        }
-
-        for (String item : document.getCheckingPost()) {
-            checkingPost.getItems().add(item);
-        }
-
-        for (String item : document.getResponsiblePost()) {
-            responsiblePost.getItems().add(item);
-        }
-
         initMainTable();
+    }
+
+    @FXML
+    public void organizationSelecting() {
+        document.setOrganization(this.organization.getSelectionModel().getSelectedItem());
+    }
+
+    @FXML
+    public void unitSelecting() {
+        document.setUnit(this.unit.getSelectionModel().getSelectedItem());
+    }
+
+    @FXML
+    public void responsiblePostSelecting() {
+        document.setResponsiblePost(this.responsiblePost.getSelectionModel().getSelectedItem());
+    }
+
+    @FXML
+    public void checkingPostSelecting() {
+        document.setCheckingPost(this.checkingPost.getSelectionModel().getSelectedItem());
     }
 
     @FXML
@@ -287,16 +302,16 @@ public class Controller {
 
     @FXML
     public void dateFromAction() {
-        document.setDateFrom(dateFrom.getValue());
+        document.setDateFrom(getDate(dateFrom.getValue()));
 
-        if (document.getDateTo() != null) {
+        if (dateFrom.getValue() != null) {
             countMonthDifference();
         }
     }
 
     @FXML
     public void dateToAction() {
-        document.setDateTo(dateTo.getValue());
+        document.setDateTo(getDate(dateTo.getValue()));
 
         if (countMonthDifference()) {
             ObservableList<Product> list = mainTable.getItems();
@@ -308,8 +323,8 @@ public class Controller {
     }
 
     private boolean countMonthDifference() {
-        long difference = ChronoUnit.MONTHS.between(document.getDateFrom().withDayOfMonth(1),
-                document.getDateTo().withDayOfMonth(1));
+        long difference = ChronoUnit.MONTHS.between(dateFrom.getValue().withDayOfMonth(1),
+                dateTo.getValue().withDayOfMonth(1));
 
         if (difference < 1) {
             showMessage("Минимальный выбранный период должен составлять 1 месяц",
@@ -337,10 +352,11 @@ public class Controller {
         remains.clear();
         total.clear();
 
-        LocalDate date = document.getDateFrom();
+        LocalDate date = dateFrom.getValue();
 
         for (int i = 0; i <= difference; i++) {
             int index = i;
+
             String headerDate = getDate(date);
 
             TableColumn <Product,
@@ -453,14 +469,12 @@ public class Controller {
         costTable.getColumns().addAll(total);
     }
 
-    private String getCurrentDate() {
+    private void setCurrentDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDate date = LocalDate.now();
-        document.setDate(date.format(formatter));
-        return document.getDate();
+        document.setDate(LocalDate.now().format(formatter));
     }
 
-    public static String getDate(LocalDate date) {
+    private String getDate(LocalDate date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         return date.format(formatter);
     }
