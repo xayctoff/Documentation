@@ -8,9 +8,8 @@ import java.util.HashMap;
 
 public class Product {
 
-    private static final String directoryName = "src/main/resources/data";
-    private static final String productsFile = "products.txt";
-    private static final String measuresFile = "measures.txt";
+    private static final String productsFile = "/data/products.txt";
+    private static final String measuresFile = "/data/measures.txt";
     private static final int remainsCapacity = 5;
 
     private int position;
@@ -32,8 +31,7 @@ public class Product {
         HashMap <String, String> measuresCodes = new HashMap<>();
 
         try {
-            FileInputStream stream = new FileInputStream(new File
-                    (directoryName + File.separator + productsFile));
+            FileInputStream stream = new FileInputStream(Product.class.getResource(productsFile).getPath());
             BufferedReader bufferedReader = new BufferedReader
                     (new InputStreamReader(stream));
             String line;
@@ -43,7 +41,7 @@ public class Product {
                 productCodes.put(position[0], position[1]);
             }
 
-            stream = new FileInputStream(new File(directoryName + File.separator + measuresFile));
+            stream = new FileInputStream(Product.class.getResource(measuresFile).getPath());
             bufferedReader = new BufferedReader(new InputStreamReader(stream));
 
             while ((line = bufferedReader.readLine()) != null) {
