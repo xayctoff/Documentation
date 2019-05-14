@@ -41,22 +41,22 @@ public class Excel {
             Cell cell;
 
             if (this.document.getOCUD() != null) {
-                cell = sheet.getRow(4).getCell(73);
+                cell = sheet.getRow(4).getCell(72);
                 cell.setCellValue(this.document.getOCUD());
             }
 
             if (this.document.getOCPO() != null) {
-                cell = sheet.getRow(5).getCell(73);
+                cell = sheet.getRow(5).getCell(72);
                 cell.setCellValue(this.document.getOCPO());
             }
 
             if (this.document.getOrganization() != null) {
-                cell = sheet.getRow(5).getCell(24);
+                cell = sheet.getRow(5).getCell(0);
                 cell.setCellValue(this.document.getOrganization());
             }
 
             if (this.document.getUnit() != null) {
-                cell = sheet.getRow(7).getCell(24);
+                cell = sheet.getRow(7).getCell(0);
                 cell.setCellValue(this.document.getUnit());
             }
 
@@ -96,7 +96,7 @@ public class Excel {
             }
 
             if (this.document.getCheckingFace() != null) {
-                cell = sheet.getRow(68).getCell(66);
+                cell = sheet.getRow(68).getCell(56);
                 cell.setCellValue(this.document.getCheckingFace());
             }
 
@@ -108,47 +108,48 @@ public class Excel {
 
                     int column = 0;
 
+                    if (product.getTitle() == null) {
+                        break;
+                    }
+
                     if (product.getPosition() != null) {
 
                         if (product.getPosition() > Document.maxFrontSideRows) {
-                            column = 34;
-
-                            for (Double sum : document.getTotal().getSideSum()) {
-
-                                if (sum != null) {
-                                    cell = sheet.getRow(row).getCell(column += 10);
-                                    cell.setCellValue(sum);
-                                }
-
-                            }
-
                             row = 43;
-                            column = 0;
                         }
 
-                        cell = sheet.getRow(row).getCell(column += 3);
+                        cell = sheet.getRow(row).getCell(column);
                         cell.setCellValue(product.getPosition());
                     }
 
-                    if (product.getTitle() != null) {
-                        cell = sheet.getRow(row).getCell(column += 12);
-                        cell.setCellValue(product.getTitle());
-                    }
+                    column += 3;
+
+
+                    cell = sheet.getRow(row).getCell(column);
+                    cell.setCellValue(product.getTitle());
+
+                    column += 12;
 
                     if (product.getCode() != null) {
-                        cell = sheet.getRow(row).getCell(column += 4);
+                        cell = sheet.getRow(row).getCell(column);
                         cell.setCellValue(product.getCode());
                     }
 
+                    column += 4;
+
                     if (product.getMeasures() != null) {
-                        cell = sheet.getRow(row).getCell(column += 4);
+                        cell = sheet.getRow(row).getCell(column);
                         cell.setCellValue(product.getMeasures());
                     }
 
+                    column += 4;
+
                     if (product.getOKEI() != null) {
-                        cell = sheet.getRow(row).getCell(column += 4);
+                        cell = sheet.getRow(row).getCell(column);
                         cell.setCellValue(product.getOKEI());
                     }
+
+                    column += 3;
 
                     if (product.getCost() != null) {
                         cell = sheet.getRow(row).getCell(column);
@@ -166,20 +167,39 @@ public class Excel {
                             int count = remain.getValue().getKey();
                             double cost = remain.getValue().getValue();
 
-                            cell = sheet.getRow(headerRow).getCell(headerColumn += 2);
-                            cell.setCellValue(date.substring(0, 2));
-
-                            cell = sheet.getRow(headerRow).getCell(headerColumn += 4);
+                            cell = sheet.getRow(headerRow).getCell(headerColumn);
                             cell.setCellValue(date.substring(3, 5));
 
-                            cell = sheet.getRow(headerRow).getCell(headerColumn += 4);
-                            cell.setCellValue(date.substring(6));
+                            cell = sheet.getRow(headerRow + 19).getCell(headerColumn);
+                            cell.setCellValue(date.substring(3, 5));
 
-                            cell = sheet.getRow(row).getCell(column += 4);
+                            headerColumn += 2;
+
+                            cell = sheet.getRow(headerRow).getCell(headerColumn);
+                            cell.setCellValue(date.substring(6, 8));
+
+                            cell = sheet.getRow(headerRow + 19).getCell(headerColumn);
+                            cell.setCellValue(date.substring(6, 8));
+
+                            headerColumn += 4;
+
+                            cell = sheet.getRow(headerRow).getCell(headerColumn);
+                            cell.setCellValue(date.substring(9));
+
+                            cell = sheet.getRow(headerRow + 19).getCell(headerColumn);
+                            cell.setCellValue(date.substring(9));
+
+                            headerColumn += 4;
+
+                            cell = sheet.getRow(row).getCell(column);
                             cell.setCellValue(count);
 
-                            cell = sheet.getRow(row).getCell(column += 6);
+                            column += 4;
+
+                            cell = sheet.getRow(row).getCell(column);
                             cell.setCellValue(cost);
+
+                            column += 6;
                         }
 
                     }
@@ -190,9 +210,23 @@ public class Excel {
 
             }
 
-            int row = 65;
+            int row = 34;
             int column = 34;
             int index = 0;
+
+            for (Double sum : document.getTotal().getSideSum()) {
+
+                if (sum != null) {
+                    cell = sheet.getRow(row).getCell(column);
+                    cell.setCellValue(sum);
+                }
+
+                column += 10;
+
+            }
+
+            row = 65;
+            column = 34;
 
             for (Double sum : document.getTotal().getSum()) {
 
@@ -200,9 +234,11 @@ public class Excel {
                     cell = sheet.getRow(row).getCell(column);
                     cell.setCellValue(sum - document.getTotal().getOneSideSum(index++));
 
-                    cell = sheet.getRow(row + 1).getCell(column += 10);
+                    cell = sheet.getRow(row + 1).getCell(column);
                     cell.setCellValue(sum);
                 }
+
+                column += 10;
 
             }
 
