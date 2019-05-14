@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class Controller {
 
@@ -99,7 +100,6 @@ public class Controller {
     private ArrayList <TableColumn <Product, Pair <TableColumn <Product, Integer>,
             TableColumn <Product, Double>>>> remains;
     private ArrayList <TableColumn <Total, Double>> totals;
-    private ArrayList <String> dates;
 
     @FXML
     public void initialize() {
@@ -109,7 +109,6 @@ public class Controller {
 
         remains = new ArrayList <>();
         totals = new ArrayList <>();
-        dates = new ArrayList <>();
 
         Data data = new Data();
 
@@ -126,6 +125,9 @@ public class Controller {
         title.setText(title.getText() + " №" + document.getNumber() + " от " + document.getDate());
         valueOCUD.setText(document.getOCUD());
         valueOCPO.setText(document.getOCPO());
+
+        responsibleFace.setOnAction(event -> responsibleFaceFilling());
+        checkingFace.setOnAction(event -> checkingFaceFilling());
 
         initMainTable();
     }
@@ -145,21 +147,20 @@ public class Controller {
         document.setResponsiblePost(this.responsiblePost.getSelectionModel().getSelectedItem());
     }
 
-    @FXML
     public void checkingPostSelecting() {
         document.setCheckingPost(this.checkingPost.getSelectionModel().getSelectedItem());
     }
 
     @FXML
     public void responsibleFaceFilling() {
-        responsibleFace.textProperty().addListener((observable, oldValue, newValue)
-                -> document.setResponsibleFace(newValue));
+        responsibleFace.textProperty().addListener((observableValue, oldValue, newValue)
+            -> document.setCheckingFace(newValue));
     }
 
     @FXML
     public void checkingFaceFilling() {
         checkingFace.textProperty().addListener((observable, oldValue, newValue)
-                -> document.setCheckingFace(newValue));
+            -> document.setCheckingFace(newValue));
     }
 
     @FXML
@@ -356,11 +357,13 @@ public class Controller {
     }
 
     private void setRemains(Product product) {
-        HashMap <String, Pair <Integer, Double>> remains = new HashMap <>();
+        TreeMap <String, Pair <Integer, Double>> remains = new TreeMap <>();
+        int index = 0;
 
         for (TableColumn <Product, Pair <TableColumn <Product, Integer>, TableColumn <Product, Double>>>
                 column : this.remains) {
-            remains.put(column.getText().substring(11), new Pair <>(0, 0.0));
+            remains.put(index + ", " + column.getText().substring(11), new Pair <>(0, 0.0));
+            index++;
         }
 
         product.setRemains(remains);
@@ -406,7 +409,6 @@ public class Controller {
 
         remains.clear();
         totals.clear();
-        dates.clear();
 
         LocalDate date = dateFrom.getValue();
 
@@ -414,7 +416,6 @@ public class Controller {
             int index = i;
 
             String headerDate = getDate(date);
-            dates.add(headerDate);
 
             TableColumn <Product,
                     Pair <TableColumn <Product, Integer>, TableColumn <Product, Double>>> mainTableColumn =
@@ -422,13 +423,15 @@ public class Controller {
             mainTableColumn.setPrefWidth(mainTableColumnWidth);
             mainTableColumn.setResizable(false);
 
+            String key = index + ", " + headerDate;
+
             Pair <TableColumn <Product, Integer>, TableColumn <Product, Double>> columnPair =
                     new Pair <>(new TableColumn <>("Количество"), new TableColumn <>("Сумма"));
 
             TableColumn <Product, Integer> remainsCount = columnPair.getKey();
             remainsCount.setCellValueFactory(
                     productIntegerCellDataFeatures -> new SimpleIntegerProperty(productIntegerCellDataFeatures
-                            .getValue().getRemains().get(headerDate).getKey()).asObject());
+                            .getValue().getRemains().get(key).getKey()).asObject());
 
             remainsCount.setCellFactory(new Callback<>() {
 
@@ -461,8 +464,8 @@ public class Controller {
 
                     field.setOnAction(event -> {
                         Product product = mainTable.getItems().get(cell.getIndex());
-                        product.setRemainsCount(headerDate, Integer.parseInt(field.getText()));
-                        mainTable.getItems().get(cell.getIndex()).setRemainsOneSum(headerDate, product.getCost() *
+                        product.setRemainsCount(key, Integer.parseInt(field.getText()));
+                        mainTable.getItems().get(cell.getIndex()).setRemainsOneSum(key, product.getCost() *
                                 Integer.parseInt(field.getText()));
                         mainTable.refresh();
 
@@ -489,7 +492,7 @@ public class Controller {
             TableColumn <Product, Double> remainsSum = columnPair.getValue();
             remainsSum.setCellValueFactory(
                     productIntegerCellDataFeatures -> new SimpleDoubleProperty(productIntegerCellDataFeatures
-                            .getValue().getRemains().get(headerDate).getValue()).asObject());
+                            .getValue().getRemains().get(key).getValue()).asObject());
             remainsSum.setEditable(false);
 
             mainTableColumn.getColumns().add(remainsCount);
