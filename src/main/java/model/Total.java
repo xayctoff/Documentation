@@ -69,7 +69,11 @@ public class Total {
 
             for (Map.Entry <String, Pair <Integer, Double>> remain : item.getRemains().entrySet()) {
                 int count = remain.getValue().getKey();
-                double cost = remain.getValue().getValue() / count;
+                double cost = 0;
+
+                if (count != 0) {
+                    cost = remain.getValue().getValue() / count;
+                }
 
                 if (product == item) {
                     values.set(index, values.get(index) + (count * value));
