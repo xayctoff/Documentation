@@ -1,6 +1,7 @@
 package scene;
 
 import data.Data;
+import data.Excel;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
@@ -15,11 +16,10 @@ import javafx.util.Callback;
 import javafx.util.Pair;
 import javafx.util.converter.IntegerStringConverter;
 import model.Document;
-import data.Excel;
 import model.Product;
 import model.Total;
 
-import java.io.*;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -97,16 +97,21 @@ public class Controller {
     private Button saveButton;
 
     private ArrayList <TableColumn <Product, Pair <TableColumn <Product, Integer>,
-            TableColumn <Product, Double>>>> remains = new ArrayList<>();
-    private ArrayList <TableColumn <Total, Double>> total = new ArrayList<>();
+            TableColumn <Product, Double>>>> remains;
+    private ArrayList <TableColumn <Total, Double>> totals;
+    private ArrayList <String> dates;
 
     @FXML
     public void initialize() {
-        mainTable.setPlaceholder(new Label("Для начала работы с таблицей установите отчётный период"));
-        costTable.setPlaceholder(new Label("Для начала работы с таблицей установите отчётный период"));
+        mainTable.setPlaceholder(new Label("Для начала работы установите отчётный период"));
+        costTable.setPlaceholder(new Label("Для начала работы установите отчётный период"));
         document = new Document();
+
+        remains = new ArrayList <>();
+        totals = new ArrayList <>();
+        dates = new ArrayList <>();
+
         Data data = new Data();
-        Product.init();
 
         Pair <ArrayList <String>, ArrayList <String>> header = data.getHeader(document);
         ArrayList <String> footer = data.getFooter();
@@ -116,7 +121,7 @@ public class Controller {
         responsiblePost.getItems().addAll(footer);
         checkingPost.getItems().addAll(footer);
 
-        setCurrentDate();
+        setDate();
 
         title.setText(title.getText() + " №" + document.getNumber() + " от " + document.getDate());
         valueOCUD.setText(document.getOCUD());
@@ -157,6 +162,47 @@ public class Controller {
                 -> document.setCheckingFace(newValue));
     }
 
+    @FXML
+    public void dateFromAction() {
+        document.setDateFrom(getDate(dateFrom.getValue()));
+
+        if (dateFrom.getValue() != null && dateTo.getValue() != null) {
+            countMonthDifference();
+
+            for (Product product : document.getProducts()) {
+                setRemains(product);
+            }
+
+            setSum();
+        }
+    }
+
+    @FXML
+    public void dateToAction() {
+        document.setDateTo(getDate(dateTo.getValue()));
+
+        if (dateFrom.getValue() != null && dateTo.getValue() != null) {
+
+            if (countMonthDifference()) {
+                ObservableList<Product> list = mainTable.getItems();
+
+                if (list.isEmpty()) {
+                    addRow();
+                }
+
+                else {
+
+                    for (Product product : document.getProducts()) {
+                        setRemains(product);
+                    }
+
+                    setSum();
+
+                }
+            }
+        }
+    }
+
     private void initMainTable() {
         number.setCellValueFactory(new PropertyValueFactory<>("position"));
         name.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -173,13 +219,13 @@ public class Controller {
         number.setOnEditCommit(event ->
                 event.getTableView().getItems().get(event.getTablePosition().getRow()).setPosition(event.getNewValue()));
 
-        createComboBox(name, Product.getProductCodes());
+        createComboBoxCell(name, Product.getProductCodes());
 
 
         productCode.setCellFactory(TextFieldTableCell.forTableColumn());
         productCode.setEditable(false);
 
-        createComboBox(measures, Product.getMeasuresCodes());
+        createComboBoxCell(measures, Product.getMeasuresCodes());
 
         measuresCode.setCellFactory(TextFieldTableCell.forTableColumn());
         measuresCode.setEditable(false);
@@ -217,7 +263,13 @@ public class Controller {
                     mainTable.getItems().get(cell.getIndex()).setRemainsSum(product.getCost());
                     mainTable.refresh();
 
-                    costTable.getItems().get(0).setSum(product.getCost(), product);
+                    Total total = costTable.getItems().get(0);
+
+                    if (cell.getIndex() < Document.maxFrontSideRows) {
+                        total.setSideSum(product.getCost(), document.getProducts(), product);
+                    }
+
+                    costTable.getItems().get(0).setSum(product.getCost(), document.getProducts(), product);
                     costTable.refresh();
                 });
 
@@ -229,7 +281,7 @@ public class Controller {
         costTable.setEditable(false);
     }
 
-    private void createComboBox(TableColumn <Product, String> column, HashMap <String, String> codes) {
+    private void createComboBoxCell(TableColumn <Product, String> column, HashMap <String, String> codes) {
         ObservableList <String> items = FXCollections.observableArrayList(codes.keySet());
         column.setCellFactory(new Callback <>() {
 
@@ -266,7 +318,7 @@ public class Controller {
                         product.setTitle(comboBox.getSelectionModel().getSelectedItem());
                         mainTable.getItems().get(cell.getIndex())
                                 .setCode(codes.get(product.getTitle()));
-                        addLine();
+                        addRow();
                     }
 
                     else {
@@ -283,10 +335,12 @@ public class Controller {
         });
     }
 
-    private void addLine() {
+    private void addRow() {
         if (Product.counter == 1) {
             Product product = new Product(Product.counter++);
             Total total = new Total();
+            setRemains(product);
+            setSum();
             document.add(product);
             this.mainTable.getItems().add(product);
             this.costTable.getItems().add(total);
@@ -295,31 +349,32 @@ public class Controller {
         else if (Product.counter < Document.maxRows &&
                 this.mainTable.getItems().get(this.mainTable.getItems().size() - 1).getTitle() != null) {
             Product product = new Product(Product.counter++);
+            setRemains(product);
             document.add(product);
             this.mainTable.getItems().add(product);
         }
     }
 
-    @FXML
-    public void dateFromAction() {
-        document.setDateFrom(getDate(dateFrom.getValue()));
+    private void setRemains(Product product) {
+        HashMap <String, Pair <Integer, Double>> remains = new HashMap <>();
 
-        if (dateFrom.getValue() != null) {
-            countMonthDifference();
+        for (TableColumn <Product, Pair <TableColumn <Product, Integer>, TableColumn <Product, Double>>>
+                column : this.remains) {
+            remains.put(column.getText().substring(11), new Pair <>(0, 0.0));
         }
+
+        product.setRemains(remains);
     }
 
-    @FXML
-    public void dateToAction() {
-        document.setDateTo(getDate(dateTo.getValue()));
+    private void setSum() {
+        ArrayList <Double> totals = new ArrayList <>();
 
-        if (countMonthDifference()) {
-            ObservableList<Product> list = mainTable.getItems();
-
-            if (list.isEmpty()) {
-                addLine();
-            }
+        while (totals.size() != this.totals.size()) {
+            totals.add(0.0);
         }
+
+        Total.setSum(totals);
+        Total.setSideSum(totals);
     }
 
     private boolean countMonthDifference() {
@@ -339,18 +394,19 @@ public class Controller {
         }
 
         else {
-            addColumns(difference);
+            addRemainsColumns(difference);
             return true;
         }
 
     }
 
-    private void addColumns(long difference) {
+    private void addRemainsColumns(long difference) {
         mainTable.getColumns().removeAll(remains);
-        costTable.getColumns().removeAll(total);
+        costTable.getColumns().removeAll(totals);
 
         remains.clear();
-        total.clear();
+        totals.clear();
+        dates.clear();
 
         LocalDate date = dateFrom.getValue();
 
@@ -358,6 +414,7 @@ public class Controller {
             int index = i;
 
             String headerDate = getDate(date);
+            dates.add(headerDate);
 
             TableColumn <Product,
                     Pair <TableColumn <Product, Integer>, TableColumn <Product, Double>>> mainTableColumn =
@@ -371,7 +428,7 @@ public class Controller {
             TableColumn <Product, Integer> remainsCount = columnPair.getKey();
             remainsCount.setCellValueFactory(
                     productIntegerCellDataFeatures -> new SimpleIntegerProperty(productIntegerCellDataFeatures
-                            .getValue().getRemains().get(index).getKey()).asObject());
+                            .getValue().getRemains().get(headerDate).getKey()).asObject());
 
             remainsCount.setCellFactory(new Callback<>() {
 
@@ -404,9 +461,9 @@ public class Controller {
 
                     field.setOnAction(event -> {
                         Product product = mainTable.getItems().get(cell.getIndex());
-                        product.setRemainsCount(Integer.parseInt(field.getText()), index);
-                        mainTable.getItems().get(cell.getIndex()).setRemainsOneSum(product.getCost() *
-                                Integer.parseInt(field.getText()), index);
+                        product.setRemainsCount(headerDate, Integer.parseInt(field.getText()));
+                        mainTable.getItems().get(cell.getIndex()).setRemainsOneSum(headerDate, product.getCost() *
+                                Integer.parseInt(field.getText()));
                         mainTable.refresh();
 
                         Total total = costTable.getItems().get(0);
@@ -414,9 +471,10 @@ public class Controller {
                         double oldValue = oldCount[0] * cost;
                         double newValue = Double.parseDouble(field.getText()) * cost;
                         double sum = total.getOneSum(index);
+                        double sideSum = total.getOneSideSum(index);
 
                         if (document.getProducts().size() < Document.maxFrontSideRows) {
-                            total.setSideSum(sum - oldValue + newValue, index);
+                            total.setOneSideSum(sideSum - oldValue + newValue, index);
                         }
 
                         costTable.getItems().get(0).setOneSum(sum - oldValue + newValue, index);
@@ -431,7 +489,7 @@ public class Controller {
             TableColumn <Product, Double> remainsSum = columnPair.getValue();
             remainsSum.setCellValueFactory(
                     productIntegerCellDataFeatures -> new SimpleDoubleProperty(productIntegerCellDataFeatures
-                            .getValue().getRemains().get(index).getValue()).asObject());
+                            .getValue().getRemains().get(headerDate).getValue()).asObject());
             remainsSum.setEditable(false);
 
             mainTableColumn.getColumns().add(remainsCount);
@@ -447,7 +505,7 @@ public class Controller {
                     -> new SimpleDoubleProperty(productIntegerCellDataFeatures
                     .getValue().getSum().get(index)).asObject());
             costTableColumn.setEditable(false);
-            total.add(costTableColumn);
+            totals.add(costTableColumn);
 
             date = date.plusMonths(1);
 
@@ -466,17 +524,17 @@ public class Controller {
         }
 
         mainTable.getColumns().addAll(remains);
-        costTable.getColumns().addAll(total);
-    }
-
-    private void setCurrentDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        document.setDate(LocalDate.now().format(formatter));
+        costTable.getColumns().addAll(totals);
     }
 
     private String getDate(LocalDate date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         return date.format(formatter);
+    }
+
+    private void setDate() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        document.setDate(LocalDate.now().format(formatter));
     }
 
     private static Document getDocument() {
@@ -506,5 +564,4 @@ public class Controller {
             excel.write();
         }
     }
-
 }
