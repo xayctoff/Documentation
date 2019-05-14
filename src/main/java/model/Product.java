@@ -4,6 +4,7 @@ import data.Data;
 import javafx.util.Pair;
 
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 
 public class Product {
@@ -17,7 +18,7 @@ public class Product {
 
     public static int counter = 1;
 
-    private HashMap <String, Pair <Integer, Double>> remains;
+    private TreeMap <String, Pair <Integer, Double>> remains;
     private static HashMap <String, String> productCodes;
     private static HashMap <String, String> measuresCodes;
 
@@ -31,7 +32,7 @@ public class Product {
         this.position = position;
         this.cost = 0.0;
 
-        remains = new HashMap <>();
+        remains = new TreeMap <>();
     }
 
     public static HashMap <String, String> getProductCodes() {
@@ -90,11 +91,11 @@ public class Product {
         this.cost = cost;
     }
 
-    public HashMap <String, Pair <Integer, Double>> getRemains() {
+    public TreeMap <String, Pair <Integer, Double>> getRemains() {
         return remains;
     }
 
-    public void setRemains(HashMap <String, Pair <Integer, Double>> remains) {
+    public void setRemains(TreeMap <String, Pair <Integer, Double>> remains) {
         this.remains = remains;
     }
 
