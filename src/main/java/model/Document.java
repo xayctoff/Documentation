@@ -32,6 +32,10 @@ public class Document {
     private ArrayList <Product> products;
     private Total total;
 
+    public Document() {
+        this.total = new Total();
+    }
+
     public void add(Product product) {
         if (this.products == null) {
             this.products = new ArrayList<>();
@@ -192,10 +196,6 @@ public class Document {
 
     public Total getTotal() {
         return total;
-    }
-
-    public void setTotal(Total total) {
-        this.total = total;
     }
 
     public ArrayList <Product> getProducts() {
