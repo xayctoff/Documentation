@@ -1,16 +1,12 @@
 package model;
 
+import data.Data;
 import javafx.util.Pair;
 
-import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Product {
-
-    private static final String productsFile = "/data/products.txt";
-    private static final String measuresFile = "/data/measures.txt";
-    private static final int remainsCapacity = 5;
 
     private Integer position;
     private String code;
@@ -21,55 +17,21 @@ public class Product {
 
     public static int counter = 1;
 
-    private ArrayList <Pair <Integer, Double>> remains;
+    private HashMap <String, Pair <Integer, Double>> remains;
     private static HashMap <String, String> productCodes;
     private static HashMap <String, String> measuresCodes;
 
-    public static void init() {
-        String[] position;
-        HashMap <String, String> productCodes = new HashMap<>();
-        HashMap <String, String> measuresCodes = new HashMap<>();
-
-        try {
-            FileInputStream stream = new FileInputStream(Product.class.getResource(productsFile).getPath());
-            BufferedReader bufferedReader = new BufferedReader
-                    (new InputStreamReader(stream));
-            String line;
-
-            while((line = bufferedReader.readLine()) != null ) {
-                position = line.split("#");
-                productCodes.put(position[0], position[1]);
-            }
-
-            stream = new FileInputStream(Product.class.getResource(measuresFile).getPath());
-            bufferedReader = new BufferedReader(new InputStreamReader(stream));
-
-            while ((line = bufferedReader.readLine()) != null) {
-                position = line.split("#");
-                measuresCodes.put(position[0], position[1]);
-            }
-
-            Product.productCodes = productCodes;
-            Product.measuresCodes = measuresCodes;
-
-        }
-
-        catch (IOException exception) {
-            exception.printStackTrace();
-        }
-
+    static {
+        Pair <HashMap <String, String>, HashMap <String, String>> pair = new Data().getCodes();
+        productCodes = pair.getKey();
+        measuresCodes = pair.getValue();
     }
 
     public Product(int position) {
         this.position = position;
+        this.cost = 0.0;
 
-        remains = new ArrayList <>(remainsCapacity) {
-            {
-                for (int i = 0; i < remainsCapacity; i++) {
-                    add(new Pair<>(0, 0.0));
-                }
-            }
-        };
+        remains = new HashMap <>();
     }
 
     public static HashMap <String, String> getProductCodes() {
@@ -128,37 +90,36 @@ public class Product {
         this.cost = cost;
     }
 
-    public ArrayList <Pair <Integer, Double>> getRemains() {
+    public HashMap <String, Pair <Integer, Double>> getRemains() {
         return remains;
     }
 
-    public void setRemains(int index, int count) {
-        remains.set(index, new Pair <> (count, getCost() * count));
+    public void setRemains(HashMap <String, Pair <Integer, Double>> remains) {
+        this.remains = remains;
     }
 
-    public int getRemainsCount(int index) {
-        return remains.get(index).getKey();
+    public int getRemainsCount(String key) {
+        return remains.get(key).getKey();
     }
 
-    public void setRemainsCount(int count, int index) {
-        remains.set(index, new Pair<> (count, getRemainsSum(index)));
+    public void setRemainsCount(String key, int count) {
+        remains.put(key, new Pair <> (count, getRemainsSum(key)));
     }
 
-    public double getRemainsSum(int index) {
-        return remains.get(index).getValue();
+    public double getRemainsSum(String key) {
+        return remains.get(key).getValue();
     }
 
-    public void setRemainsOneSum(double sum, int index) {
-        remains.set(index, new Pair<> (getRemainsCount(index), sum));
+    public void setRemainsOneSum(String key, double sum) {
+        remains.put(key, new Pair<> (getRemainsCount(key), sum));
     }
 
     public void setRemainsSum(double sum) {
-        int index = 0;
 
-        for (Pair <Integer, Double> pair : remains) {
-            int count = pair.getKey();
-            remains.set(index, new Pair <>(count, sum * count));
-            index++;
+        for (Map.Entry <String, Pair <Integer, Double>> remain : remains.entrySet()) {
+            String key = remain.getKey();
+            int count = remain.getValue().getKey();
+            remains.put(key, new Pair <>(count, sum * count));
         }
     }
 
